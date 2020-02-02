@@ -7,20 +7,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
-import android.location.GpsSatellite;
-import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Checking device's GPS settings and select the best provider
@@ -31,7 +27,7 @@ import java.util.Objects;
  * .setMinimumTime(milliSeconds)
  * .build();
  */
-public class MyGPSManager implements GpsStatus.Listener, LocationListener {
+public class MyGPSManager implements LocationListener {
 
     /**
      * Callback interface to receive GPS updates from MyGPSManager.
@@ -237,24 +233,6 @@ public class MyGPSManager implements GpsStatus.Listener, LocationListener {
                 gpsListener.onGpsNetworkStatusUpdate("Network Location Started");
                 break;
         }
-    }
-
-    public void onGpsStatusChanged(int event) {
-        int Satellites = 0;
-        int SatellitesInFix = 0;
-        if (ActivityCompat.checkSelfPermission(contextWeakReference.get(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(contextWeakReference.get(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) contextWeakReference.get(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
-        }
-
-        int timeToFix = Objects.requireNonNull(locationManager.getGpsStatus(null)).getTimeToFirstFix();
-        Log.i("GPs", "Time to first fix = " + timeToFix);
-        for (GpsSatellite sat : Objects.requireNonNull(locationManager.getGpsStatus(null)).getSatellites()) {
-            if (sat.usedInFix()) {
-                SatellitesInFix++;
-            }
-            Satellites++;
-        }
-        Log.i("GPS", Satellites + " Used In Last Fix (" + SatellitesInFix + ")");
     }
 
     @Override
