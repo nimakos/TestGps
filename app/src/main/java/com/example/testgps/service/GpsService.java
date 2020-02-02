@@ -15,7 +15,7 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 
 import com.example.testgps.googleapi.GoogleLocator;
-import com.example.testgps.broadcast.MyBroadcastReceiver;
+import com.example.testgps.receiver.MyBroadcastReceiver;
 
 public class GpsService extends Service implements GoogleLocator.OnLocationUpdateListener {
 

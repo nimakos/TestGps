@@ -1,4 +1,4 @@
-package com.example.testgps.broadcast;
+package com.example.testgps.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,13 +44,15 @@ public final class MyBroadcastReceiver extends BroadcastReceiver {
         String action = intent.getAction();
 
         if (action != null) {
-            if (LOCATION_UPDATE.equals(action)) {
+            if (action.equals(LOCATION_UPDATE)) {
                 if (intent.getExtras() != null) {
                     Location location = (Location) intent.getExtras().get(COORDINATES);
                     if (onLocationUpdateListener != null) {
                         onLocationUpdateListener.getGoogleLocationUpdate(location);
                     }
                 }
+            } else if (action.equals("aekara")) {
+                System.out.println();
             }
         }
     }

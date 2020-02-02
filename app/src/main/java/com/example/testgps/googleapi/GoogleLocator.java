@@ -3,12 +3,15 @@ package com.example.testgps.googleapi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
 import com.example.testgps.MainActivity;
+import com.example.testgps.receiver.MyBroadcastReceiver;
+import com.example.testgps.service.GpsService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -235,16 +238,20 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this);
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, this, Looper.myLooper());
+        //fusedLocationProviderClient.requestLocationUpdates(locationRequest, this, Looper.myLooper());
 
-    /*    Intent locationIntent = new Intent(context, MainActivity.class);
+        String proximitys = "aekara";
+        IntentFilter filter = new IntentFilter(proximitys);
+        MyBroadcastReceiver mybroadcast = new MyBroadcastReceiver.Builder().build();
+        context.registerReceiver(mybroadcast, filter);
+        Intent intent = new Intent(proximitys);
         PendingIntent locationPendingIntent = PendingIntent.getBroadcast(
                 context,
                 0,
-                locationIntent,
+                intent,
                 PendingIntent.FLAG_UPDATE_CURRENT
-        );*/
+        );
 
-        //fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationPendingIntent);
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationPendingIntent);
     }
 }
