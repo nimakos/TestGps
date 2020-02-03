@@ -1,17 +1,11 @@
 package com.example.testgps.googleapi;
 
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
-import com.example.testgps.MainActivity;
-import com.example.testgps.receiver.MyBroadcastReceiver;
-import com.example.testgps.service.GpsService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -27,14 +21,14 @@ import java.lang.ref.WeakReference;
  * Checking device's GPS settings and select the best provider
  * Call from activity like:
  * googleLocation = new GoogleLocator
- *  .Builder(this, this)
- *  .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
- *  .setFastestInterval(17000)
- *  .setUpdateInterval(11000)
- *  .setSpeedListener(this)
- *  .setSuccessListener(this)
- *  .hasSingleInstance(true)
- *  .build();
+ * .Builder(this, this)
+ * .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+ * .setFastestInterval(17000)
+ * .setUpdateInterval(11000)
+ * .setSpeedListener(this)
+ * .setSuccessListener(this)
+ * .hasSingleInstance(true)
+ * .build();
  */
 public class GoogleLocator extends LocationCallback implements OnSuccessListener<Location> {
 
@@ -53,15 +47,13 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
         void onSuccess(Location location);
     }
 
-    //required parameters
-    private OnLocationUpdateListener onLocationUpdateListener;
-
     //optional parameters
     private long UPDATE_INTERVAL;
     private long FASTEST_INTERVAL;
     private int PRIORITY;
     private OnSpeedUpdateListener onSpeedUpdateListener;
     private OnSuccessListener onSuccessListener;
+    private OnLocationUpdateListener onLocationUpdateListener;
 
     //class parameters
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -71,7 +63,6 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
     public static class Builder {
 
         //required parameters
-        private OnLocationUpdateListener onLocationUpdateListener;
         private Context context;
 
         //optional parameters
@@ -81,16 +72,21 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
         private OnSpeedUpdateListener onSpeedUpdateListener = null;
         private boolean createSingleInstance;
         private OnSuccessListener onSuccessListener;
+        private OnLocationUpdateListener onLocationUpdateListener;
 
         /**
          * The Builder constructor
          *
-         * @param context                  The Activity context
-         * @param onLocationUpdateListener The Observer location listener
+         * @param context The Activity context
          */
-        public Builder(Context context, OnLocationUpdateListener onLocationUpdateListener) {
+        public Builder(Context context) {
             this.context = context;
+        }
+
+        public Builder setLocationListener(OnLocationUpdateListener onLocationUpdateListener) {
             this.onLocationUpdateListener = onLocationUpdateListener;
+
+            return this;
         }
 
         public Builder setUpdateInterval(long update_interval) {
@@ -163,8 +159,7 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
                 synchronized (GoogleLocator.class) {
                     INSTANCE = new GoogleLocator(builder);
                 }
-            }
-            else {
+            } else {
                 return INSTANCE;
             }
         } else {
@@ -199,7 +194,9 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
     public void onLocationResult(@NonNull LocationResult locationResult) {
         for (Location location : locationResult.getLocations()) {
             if (location != null) {
-                onLocationUpdateListener.getGoogleLocationUpdate(location);
+                if (onLocationUpdateListener != null) {
+                    onLocationUpdateListener.getGoogleLocationUpdate(location);
+                }
                 if (onSpeedUpdateListener != null) {
                     if (location.hasSpeed())
                         onSpeedUpdateListener.getSpeedUpdate(location.getSpeed() * MPS_to_KPH);
@@ -238,20 +235,23 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this);
-        //fusedLocationProviderClient.requestLocationUpdates(locationRequest, this, Looper.myLooper());
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, this, Looper.myLooper());
 
-        String proximitys = "aekara";
-        IntentFilter filter = new IntentFilter(proximitys);
-        MyBroadcastReceiver mybroadcast = new MyBroadcastReceiver.Builder().build();
-        context.registerReceiver(mybroadcast, filter);
-        Intent intent = new Intent(proximitys);
-        PendingIntent locationPendingIntent = PendingIntent.getBroadcast(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
+        /*if (hasBroadcastLocation) {
+            String proximitys = BROADCAST_LOCATION_UPDATE;
+            IntentFilter filter = new IntentFilter(proximitys);
+            MyBroadcastReceiver mybroadcast = new MyBroadcastReceiver.Builder().build();
+            context.registerReceiver(mybroadcast, filter);
+            intent = new Intent(proximitys);
 
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationPendingIntent);
+            PendingIntent locationPendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+            );
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationPendingIntent);
+        } else {
+        }*/
     }
 }

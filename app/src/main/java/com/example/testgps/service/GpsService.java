@@ -29,7 +29,8 @@ public class GpsService extends Service implements GoogleLocator.OnLocationUpdat
 
     @Override
     public void onCreate() {
-        googleLocator = new GoogleLocator.Builder(this, this)
+        googleLocator = new GoogleLocator.Builder(this)
+                .setLocationListener(this)
                 .setUpdateInterval(1000)
                 .setFastestInterval(1)
                 .hasSingleInstance(true)
