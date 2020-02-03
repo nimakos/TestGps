@@ -9,8 +9,13 @@ import android.os.Bundle;
 import com.example.testgps.receiver.MyBroadcastReceiver;
 
 import static com.example.testgps.receiver.MyBroadcastReceiver.LOCATION_UPDATE;
+import static com.example.testgps.receiver.MyBroadcastReceiver.SPEED_UPDATE;
+import static com.example.testgps.receiver.MyBroadcastReceiver.SUCCESS_UPDATE;
 
-public class SecondActivity extends AppCompatActivity implements MyBroadcastReceiver.OnLocationUpdateListener, MyBroadcastReceiver.OnSuccessUpdateListener {
+public class SecondActivity extends AppCompatActivity implements
+        MyBroadcastReceiver.OnLocationUpdateListener,
+        MyBroadcastReceiver.OnSuccessUpdateListener,
+        MyBroadcastReceiver.OnSpeedUpdateListener{
 
     MyBroadcastReceiver myBroadcastReceiver;
     @Override
@@ -27,9 +32,12 @@ public class SecondActivity extends AppCompatActivity implements MyBroadcastRece
                     .Builder()
                     .setLocationUpdate(this)
                     .setSuccessLocationUpdate(this)
+                    .setSpeedUpdate(this)
                     .build();
         }
         registerReceiver(myBroadcastReceiver, new IntentFilter(LOCATION_UPDATE));
+        registerReceiver(myBroadcastReceiver, new IntentFilter(SUCCESS_UPDATE));
+        registerReceiver(myBroadcastReceiver, new IntentFilter(SPEED_UPDATE));
     }
 
     @Override
@@ -47,6 +55,11 @@ public class SecondActivity extends AppCompatActivity implements MyBroadcastRece
 
     @Override
     public void getGoogleSuccessLocationUpdate(Location location) {
+
+    }
+
+    @Override
+    public void getGoogleSpeedUpdate(float speed) {
 
     }
 }

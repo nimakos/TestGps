@@ -13,9 +13,14 @@ import com.example.testgps.permissions.AbsRuntimePermission;
 
 import static com.example.testgps.receiver.MyBroadcastReceiver.COORDINATES;
 import static com.example.testgps.receiver.MyBroadcastReceiver.LOCATION_UPDATE;
+import static com.example.testgps.receiver.MyBroadcastReceiver.SPEED;
+import static com.example.testgps.receiver.MyBroadcastReceiver.SPEED_UPDATE;
 import static com.example.testgps.receiver.MyBroadcastReceiver.SUCCESS_UPDATE;
 
-public class MainActivity extends AbsRuntimePermission implements MyGPSManager.GPSListener, GoogleLocator.OnLocationUpdateListener, GoogleLocator.OnSuccessListener{
+public class MainActivity extends AbsRuntimePermission implements
+        GoogleLocator.OnLocationUpdateListener,
+        GoogleLocator.OnSuccessListener,
+        GoogleLocator.OnSpeedUpdateListener {
 
     private GoogleLocator googleLocator;
     private MyGPSManager myGPSManager;
@@ -41,12 +46,12 @@ public class MainActivity extends AbsRuntimePermission implements MyGPSManager.G
     @Override
     public void onPermissionsGranted(int requestCode) {
         googleLocator = new GoogleLocator
-                .Builder(this)
-                .setLocationListener(this)
-                .setSuccessListener(this)
+                .Builder(this, this)
                 .setUpdateInterval(1000)
                 .setFastestInterval(1)
                 .hasSingleInstance(true)
+                .setSuccessListener(this)
+                .setSpeedListener(this)
                 .build();
         /*myGPSManager = new MyGPSManager
                 .Builder(this, this)
@@ -54,7 +59,6 @@ public class MainActivity extends AbsRuntimePermission implements MyGPSManager.G
                 .setMinimumTime(1)
                 .build();*/
     }
-
 
 
     @Override
@@ -72,24 +76,12 @@ public class MainActivity extends AbsRuntimePermission implements MyGPSManager.G
 
 
     @Override
-    public void getLocationUpdate(Location location) {
-
-    }
-
-    @Override
     public void getSpeedUpdate(float speed) {
-
+        Intent i = new Intent(SPEED_UPDATE);
+        i.putExtra(SPEED, speed);
+        sendBroadcast(i);
     }
 
-    @Override
-    public void onGpsNetworkStatusUpdate(String status) {
-
-    }
-
-    @Override
-    public void getLocationAsynchronousUpdate(Location location) {
-
-    }
 
     @Override
     public void getGoogleLocationUpdate(Location location) {

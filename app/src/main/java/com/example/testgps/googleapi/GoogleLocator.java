@@ -30,7 +30,7 @@ import java.lang.ref.WeakReference;
  * .hasSingleInstance(true)
  * .build();
  */
-public class GoogleLocator extends LocationCallback implements OnSuccessListener<Location> {
+public final class GoogleLocator extends LocationCallback implements OnSuccessListener<Location> {
 
     /**
      * Callback interface to receive GPS updates from MyGPSManager.
@@ -47,13 +47,15 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
         void onSuccess(Location location);
     }
 
+    //required parameters
+    private OnLocationUpdateListener onLocationUpdateListener;
+
     //optional parameters
     private long UPDATE_INTERVAL;
     private long FASTEST_INTERVAL;
     private int PRIORITY;
     private OnSpeedUpdateListener onSpeedUpdateListener;
     private OnSuccessListener onSuccessListener;
-    private OnLocationUpdateListener onLocationUpdateListener;
 
     //class parameters
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -64,29 +66,24 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
 
         //required parameters
         private Context context;
+        private OnLocationUpdateListener onLocationUpdateListener;
 
         //optional parameters
         private int priority = LocationRequest.PRIORITY_HIGH_ACCURACY;
         private long update_interval = 1000 * 2;
         private long fastest_interval = 1000;
-        private OnSpeedUpdateListener onSpeedUpdateListener = null;
+        private OnSpeedUpdateListener onSpeedUpdateListener;
         private boolean createSingleInstance;
         private OnSuccessListener onSuccessListener;
-        private OnLocationUpdateListener onLocationUpdateListener;
 
         /**
          * The Builder constructor
          *
          * @param context The Activity context
          */
-        public Builder(Context context) {
+        public Builder(Context context, OnLocationUpdateListener onLocationUpdateListener) {
             this.context = context;
-        }
-
-        public Builder setLocationListener(OnLocationUpdateListener onLocationUpdateListener) {
             this.onLocationUpdateListener = onLocationUpdateListener;
-
-            return this;
         }
 
         public Builder setUpdateInterval(long update_interval) {
@@ -194,9 +191,7 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
     public void onLocationResult(@NonNull LocationResult locationResult) {
         for (Location location : locationResult.getLocations()) {
             if (location != null) {
-                if (onLocationUpdateListener != null) {
-                    onLocationUpdateListener.getGoogleLocationUpdate(location);
-                }
+                onLocationUpdateListener.getGoogleLocationUpdate(location);
                 if (onSpeedUpdateListener != null) {
                     if (location.hasSpeed())
                         onSpeedUpdateListener.getSpeedUpdate(location.getSpeed() * MPS_to_KPH);
@@ -236,22 +231,5 @@ public class GoogleLocator extends LocationCallback implements OnSuccessListener
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this);
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, this, Looper.myLooper());
-
-        /*if (hasBroadcastLocation) {
-            String proximitys = BROADCAST_LOCATION_UPDATE;
-            IntentFilter filter = new IntentFilter(proximitys);
-            MyBroadcastReceiver mybroadcast = new MyBroadcastReceiver.Builder().build();
-            context.registerReceiver(mybroadcast, filter);
-            intent = new Intent(proximitys);
-
-            PendingIntent locationPendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-            );
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationPendingIntent);
-        } else {
-        }*/
     }
 }
